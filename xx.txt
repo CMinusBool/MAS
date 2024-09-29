@@ -1,0 +1,10 @@
+informační
+transportní
+.
+.
+
+Základní pojmy z teorie grafů
+	zopakovat pojmy z prezentace
+
+
+struktura topologické vlastnosti
