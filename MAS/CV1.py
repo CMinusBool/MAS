@@ -71,7 +71,7 @@ frequencies = np.unique(degrees, return_counts=True)
 frequencies_iter = 0
 frequencies_df = pd.DataFrame(data=None,columns=['degree', 'frequency', 'relative_frequency'])
 print("Pocet | cetnost | Relativni cetnost")
-for degree in range(maximum):
+for degree in range(maximum+1):
     if degree == frequencies[0][frequencies_iter]:
         frequencies_df.loc[len(frequencies_df)] = [degree, frequencies[1][frequencies_iter], frequencies[1][frequencies_iter] / len(adjacencyMatrix)]
         print(degree, "   |   ", frequencies[1][frequencies_iter], "   |   ", frequencies[1][frequencies_iter] / len(adjacencyMatrix))
@@ -85,7 +85,7 @@ print("Pocet | cetnost | Relativni cetnost - From adjecency list")
 frequencies_iter = 0
 frequencies_df_adj_lst = pd.DataFrame(data=None,columns=['degree', 'frequency', 'relative_frequency'])
 frequencies_adj_lst = np.unique(degrees_adj_lst, return_counts=True)
-for degree in range(maximum_adj_lst):
+for degree in range(maximum_adj_lst+1):
     if degree == frequencies_adj_lst[0][frequencies_iter]:
         frequencies_df_adj_lst.loc[len(frequencies_df_adj_lst)] = [degree, frequencies_adj_lst[1][frequencies_iter], frequencies_adj_lst[1][frequencies_iter] / len(adjacency_List)]
         print(degree, "   |   ", frequencies_adj_lst[1][frequencies_iter], "   |   ", frequencies_adj_lst[1][frequencies_iter] / len(adjacency_List))
@@ -99,7 +99,7 @@ plt.bar(frequencies_df['degree'], frequencies_df['frequency'])
 plt.xlabel('Degree')
 plt.ylabel('Frequency')
 plt.title('Frequency Histogram')
-plt.xticks(np.arange(0, maximum, 1))
+plt.xticks(np.arange(0, maximum+1, 1))
 plt.yticks(np.arange(0, frequencies_df['frequency'].max()+1, 1))
 plt.show()
 
@@ -108,6 +108,7 @@ plt.bar(frequencies_df['degree'], frequencies_df['relative_frequency'])
 plt.xlabel('Degree')
 plt.ylabel('Relative Frequency')
 plt.title('Relative Frequency Histogram')
+plt.xticks(np.arange(0, maximum+1, 1))
 plt.show()
 
 #Histogram frequency from adjecency list
@@ -115,7 +116,7 @@ plt.bar(frequencies_df_adj_lst['degree'], frequencies_df_adj_lst['frequency'])
 plt.xlabel('Degree')
 plt.ylabel('Frequency')
 plt.title('Frequency Histogram from adjecency list')
-plt.xticks(np.arange(0, maximum_adj_lst, 1))
+plt.xticks(np.arange(0, maximum_adj_lst+1, 1))
 plt.yticks(np.arange(0, frequencies_df_adj_lst['frequency'].max()+1, 1))
 plt.show()
 
@@ -124,6 +125,7 @@ plt.bar(frequencies_df_adj_lst['degree'], frequencies_df_adj_lst['relative_frequ
 plt.xlabel('Degree')
 plt.ylabel('Relative Frequency')
 plt.title('Relative Frequency Histogram from adjecency list')
+plt.xticks(np.arange(0, maximum+1, 1))
 plt.show()
 
 
