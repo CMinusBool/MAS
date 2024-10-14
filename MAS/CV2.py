@@ -90,7 +90,7 @@ print("ID   |   Closeness centrality")
 i = 1
 for element in closeness_centralities:
     print(f"{i}   |  {element}")
-    i+=1
+    i += 1
 
 
 
