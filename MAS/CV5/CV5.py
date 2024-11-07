@@ -6,6 +6,16 @@ import numpy as np
 import pandas as pd
 import csv
 
+def remove_symetric_edges(matrix):
+    number_of_symetric_edges = 0
+    number_of_edges = 0
+    for i in range(0, len(matrix)):
+        for neighbour in matrix[i]:
+            number_of_edges += 1
+            if i in matrix[neighbour]:
+                matrix[neighbour].remove(i)
+                number_of_symetric_edges += 1
+    return number_of_symetric_edges, number_of_edges, matrix
 
 def gaussian_kernel_matrix(X, sigma):
     distances = np.sum((X[:, np.newaxis] - X) ** 2, axis=-1)
@@ -55,23 +65,17 @@ kernel_matrix = np.where(kernel_matrix == 1, 0, kernel_matrix)
 K_neighbours = KNN_neighbours(kernel_matrix, 3)
 
 # remove symetric edges
-# todo fix removing symetric edges
-for i in range(0, len(K_neighbours)):
-    for neighbour in K_neighbours[i]:
-        if i not in K_neighbours[neighbour]:
-            K_neighbours[i].remove(neighbour)
+number_of_symetric_edges, number_of_edges,K_neighbours = remove_symetric_edges(K_neighbours)
 
+print(f"K_neighbours edge count: {number_of_edges}")
+print(f"Number of symetric edges: {number_of_symetric_edges}")
 
 e_neighbours = e_radius(kernel_matrix, 0.9)
 
+number_of_symetric_edges, number_of_edges, e_neighbours = remove_symetric_edges(e_neighbours)
 
+print(f"e_neighbours edge count: {number_of_edges}")
+print(f"Number of symetric edges: {number_of_symetric_edges}")
 
-print("e_neighbours total count:")
-count = 0
-for row in e_neighbours:
-    count += len(row)
-
-print(count)
-
-
+#TODO make csv file with diferent parameters
 #csv in format- Source;target;similarity
