@@ -25,7 +25,8 @@ def gaussian_kernel_matrix(X, sigma):
 
 def KNN_neighbours(matrix, k):
     neighbours = []
-    for row in matrix:
+    matrix_copy = matrix.copy()
+    for row in matrix_copy:
         row_neighbours = []
         for i in range(0, k):
             max_index = np.argmax(row)
@@ -59,7 +60,7 @@ y = df['Species'].values
 kernel_matrix = gaussian_kernel_matrix(X, 1)
 
 # change every 1 in kernel matrix to 0, beacause we don't want to have (a,a) vertices
-kernel_matrix = np.where(kernel_matrix == 1, 0, kernel_matrix)
+kernel_matrix = np.where(kernel_matrix == 1.0, 0, kernel_matrix)
 
 # KNN neighbours
 K_neighbours = KNN_neighbours(kernel_matrix, 3)
@@ -77,18 +78,18 @@ number_of_symetric_edges, number_of_edges, e_neighbours = remove_symetric_edges(
 print(f"e_neighbours edge count: {number_of_edges}")
 print(f"Number of symetric edges: {number_of_symetric_edges}")
 
-#TODO save similarity of k neighbours to csv
-# add header
 #csv in format- Source;target;similarity
-
 with open('K_neighbours.csv', mode='w', newline='') as file:
     writer = csv.writer(file, delimiter=';')
+    writer.writerow(["Source", "Target", "Sim"])
     for i in range(0, len(K_neighbours)):
         for neighbour in K_neighbours[i]:
             writer.writerow([i, neighbour, kernel_matrix[i][neighbour]])
 
+
 with open('e_neighbours.csv', mode='w', newline='') as file:
     writer = csv.writer(file, delimiter=';')
+    writer.writerow(["Source", "Target", "Sim"])
     for i in range(0, len(e_neighbours)):
         for neighbour in e_neighbours[i]:
             writer.writerow([i, neighbour, kernel_matrix[i][neighbour]])
