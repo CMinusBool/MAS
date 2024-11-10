@@ -77,5 +77,18 @@ number_of_symetric_edges, number_of_edges, e_neighbours = remove_symetric_edges(
 print(f"e_neighbours edge count: {number_of_edges}")
 print(f"Number of symetric edges: {number_of_symetric_edges}")
 
-#TODO make csv file with diferent parameters
+#TODO save similarity of k neighbours to csv
+# add header
 #csv in format- Source;target;similarity
+
+with open('K_neighbours.csv', mode='w', newline='') as file:
+    writer = csv.writer(file, delimiter=';')
+    for i in range(0, len(K_neighbours)):
+        for neighbour in K_neighbours[i]:
+            writer.writerow([i, neighbour, kernel_matrix[i][neighbour]])
+
+with open('e_neighbours.csv', mode='w', newline='') as file:
+    writer = csv.writer(file, delimiter=';')
+    for i in range(0, len(e_neighbours)):
+        for neighbour in e_neighbours[i]:
+            writer.writerow([i, neighbour, kernel_matrix[i][neighbour]])
