@@ -8,6 +8,7 @@ import numpy as np
 import csv
 import littleballoffur as lbf
 from collections import Counter
+from scipy.stats import ks_2samp
 
 
 def remove_symetric_edges(matrix):
@@ -29,6 +30,17 @@ def generate_graph(nodes = 550, probability_for_edge = 0.001):
                     edges.append((node, edge))
 
     return edges
+
+
+def normalize_array(arr):
+    arr_min = np.min(arr)
+    arr_max = np.max(arr)
+
+    # Avoid division by zero
+    if arr_max - arr_min == 0:
+        return np.zeros_like(arr)  # or handle differently based on requirements
+
+    return (arr - arr_min) / (arr_max - arr_min)
 
 def ba_model(start_nodes = 3, edges_for_start_nodes = 1,end_nodes = 10, edges_for_new = 2):
     if start_nodes < edges_for_new:
@@ -127,10 +139,10 @@ print(f"Snowball Sampling: {len(snowball_sampling.nodes())} nodes, {len(snowball
 print(f"Original Graph: {len(original.nodes())} nodes, {len(original.edges())} edges")
 
 # plotting the degree distributions
-plt.plot(degree_array_rns, degree_count_array_rns, 'ro-')
+plt.plot(degree_array_rns, degree_count_array_rns, 'yo-')
 plt.plot(degree_array_res, degree_count_array_res, 'bo-')
 plt.plot(degree_array_sns, degree_count_array_sns, 'go-')
-plt.plot(degree_array, degree_count_array, 'yo-')
+plt.plot(degree_array, degree_count_array, 'ro-')
 
 plt.legend(['Random Node Sampling', 'Random Edge Sampling', 'Snowball Sampling', 'Original Graph'])
 
@@ -153,37 +165,68 @@ cumulative_degree_count_array_sns = []
 cumulative_degree_array = []
 cumulative_degree_count_array = []
 
+degree_count_array_rns = degree_count_array_rns[::-1]
 for i in range(len(degree_array_rns)):
     cumulative_degree_array_rns.append(degree_array_rns[i])
-    cumulative_degree_count_array_rns.append(sum(degree_count_array_rns[i:]))
+    cumulative_degree_count_array_rns.append(sum(degree_count_array_rns[:i+1]))
+#divide each element in cumulative_degree_count_array by last element in cumulative_degree_count_array
+cumulative_degree_array_rns = cumulative_degree_array_rns[::-1]
+cumulative_degree_array_rns = normalize_array(cumulative_degree_array_rns)
+cumulative_degree_count_array_rns = normalize_array(cumulative_degree_count_array_rns)
+
+degree_count_array_res = degree_count_array_res[::-1]
 for i in range(len(degree_array_res)):
     cumulative_degree_array_res.append(degree_array_res[i])
-    cumulative_degree_count_array_res.append(sum(degree_count_array_res[i:]))
+    cumulative_degree_count_array_res.append(sum(degree_count_array_res[:i+1]))
+
+cumulative_degree_array_res = cumulative_degree_array_res[::-1]
+cumulative_degree_array_res = normalize_array(cumulative_degree_array_res)
+cumulative_degree_count_array_res = normalize_array(cumulative_degree_count_array_res)
+
+
+degree_count_array_sns = degree_count_array_sns[::-1]
 for i in range(len(degree_array_sns)):
     cumulative_degree_array_sns.append(degree_array_sns[i])
-    cumulative_degree_count_array_sns.append(sum(degree_count_array_sns[i:]))
+    cumulative_degree_count_array_sns.append(sum(degree_count_array_sns[:i+1]))
+
+cumulative_degree_array_sns = cumulative_degree_array_sns[::-1]
+cumulative_degree_array_sns = normalize_array(cumulative_degree_array_sns)
+cumulative_degree_count_array_sns = normalize_array(cumulative_degree_count_array_sns)
+
+degree_count_array = degree_count_array[::-1]
 for i in range(len(degree_array)):
     cumulative_degree_array.append(degree_array[i])
-    cumulative_degree_count_array.append(sum(degree_count_array[i:]))
+    cumulative_degree_count_array.append(sum(degree_count_array[:i+1]))
+
+cumulative_degree_array = cumulative_degree_array[::-1]
+cumulative_degree_array = normalize_array(cumulative_degree_array)
+cumulative_degree_count_array = normalize_array(cumulative_degree_count_array)
 
 # plot for cumulative degree distributions
 plt.figure()
 
-plt.plot(cumulative_degree_array_rns, cumulative_degree_count_array_rns, 'ro-')
-plt.plot(cumulative_degree_array_res, cumulative_degree_count_array_res, 'bo-')
-plt.plot(cumulative_degree_array_sns, cumulative_degree_count_array_sns, 'go-')
-plt.plot(cumulative_degree_array, cumulative_degree_count_array, 'yo-')
+plt.plot(cumulative_degree_array_rns, cumulative_degree_count_array_rns, 'y-')
+plt.plot(cumulative_degree_array_res, cumulative_degree_count_array_res, 'b-')
+plt.plot(cumulative_degree_array_sns, cumulative_degree_count_array_sns, 'g-')
+plt.plot(cumulative_degree_array, cumulative_degree_count_array, 'r-')
 
 plt.legend(['Random Node Sampling', 'Random Edge Sampling', 'Snowball Sampling', 'Original Graph'])
-
-plt.xlabel('Degree')
-plt.ylabel('Cumulative Frequency')
-plt.title('Cumulative Degree Distribution with Logarithmic Y-axis')
+plt.xlabel('Realative degree')
+plt.ylabel('Relative cumulative frequency')
+plt.title('Cumulative Degree Distribution with relative values')
 
 plt.show()
 
-#TODO normalize comulative distributions
-#TODO KS test
+
+# KS test
+ks_stat_rns, p_value_rns = ks_2samp(cumulative_degree_count_array, cumulative_degree_count_array_rns)
+ks_stat_res, p_value_res = ks_2samp(cumulative_degree_count_array, cumulative_degree_count_array_res)
+ks_stat_sns, p_value_sns = ks_2samp(cumulative_degree_count_array, cumulative_degree_count_array_sns)
+
+print(f"KS test for Random Node Sampling: D-value = {ks_stat_rns}, p-value = {p_value_rns}")
+print(f"KS test for Random Edge Sampling: D-value = {ks_stat_res}, p-value = {p_value_res}")
+print(f"KS test for Snowball Sampling: D-value = {ks_stat_sns}, p-value = {p_value_sns}")
 
 print(f"Time to finish: {time.time() - start_time}")
+
 
