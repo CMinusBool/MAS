@@ -84,3 +84,4 @@ print(f"D-value: {ks_poisson.statistic:.4f}, P-value: {ks_poisson.pvalue:.4f}\n"
 ks_lognormal = kstest(lognormal_dist, lambda x: lognorm.cdf(x, *lognormal_fit))
 print("K-S Test for Log-Normal Distribution:")
 print(f"D-value: {ks_lognormal.statistic:.4f}, P-value: {ks_lognormal.pvalue:.4f}\n")
+
