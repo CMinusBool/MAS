@@ -25,18 +25,19 @@ def mtx_to_graph(mtx):
 #load socfb-GWU54.mtx
 mtx = load_mtx("socfb-GWU54.mtx")
 G = mtx_to_graph(mtx)
-# # #I
-# # print(f"Pocet vrcholu: {G.number_of_nodes()}")
-# # print(f"Pocet hran: {G.number_of_edges()}")
-# # print(f"Hustota: {nx.density(G)}")
+# #I
+# print(f"Pocet vrcholu: {G.number_of_nodes()}")
+# print(f"Pocet hran: {G.number_of_edges()}")
+# print(f"Hustota: {nx.density(G)}")
 # #II
 # print(f"Prumerny stupen: {np.mean([d for n, d in G.degree()])}")
 # print(f"Maximalni stupen: {np.max([d for n, d in G.degree()])}")
 # print(f"Median stupnu: {np.median([d for n, d in G.degree()])}")
 # degree_distribution = [d for n, d in G.degree()]
-# #make histogram
-# plt.hist(degree_distribution, bins = np.max(degree_distribution))
-# plt.title("Histogram distribuce stupňů")
+# #make graph for degree distribution
+# degree_distribution_counts = np.unique(degree_distribution, return_counts=True)
+# plt.scatter(degree_distribution_counts[0], degree_distribution_counts[1], s=3)
+# plt.title("Distribuce stupňů")
 # plt.xlabel("Stupeň")
 # plt.ylabel("Počet vrcholů")
 # plt.xscale("log")
@@ -47,6 +48,7 @@ G = mtx_to_graph(mtx)
 # # Degree centrality
 # degree_centrality = nx.degree_centrality(G)
 # print(f"Průměrná degree centrality: {np.mean([v for v in degree_centrality.values()])}")
+# print(f"Median degree centrality: {np.median([v for v in degree_centrality.values()])}")
 # #graf pro degree centrality s body pro kazdou cetnost centrality
 # degree_centrality_distribution = [v for v in degree_centrality.values()]
 # degree_centrality_counts = np.unique(degree_centrality_distribution, return_counts=True)
@@ -60,15 +62,15 @@ G = mtx_to_graph(mtx)
 # # Eigenvector centrality
 # eigenvector_centrality = nx.eigenvector_centrality(G)
 # print(f"Average eigenvector centrality: {np.mean([v for v in eigenvector_centrality.values()])}")
+# print(f"Median eigenvector centrality: {np.median([v for v in eigenvector_centrality.values()])}")
 # #graf pro eigenvector centrality s body pro kazdou cetnost centrality
 # eigenvector_centrality_distribution = [v for v in eigenvector_centrality.values()]
-# eigenvector_centrality_counts = np.unique(eigenvector_centrality_distribution, return_counts=True)
-# plt.scatter(eigenvector_centrality_counts[0], eigenvector_centrality_counts[1], s=3)
+# plt.hist(eigenvector_centrality_distribution, bins=100, density=True)
 # plt.title("Eigenvector centrality distribution")
 # plt.xlabel("Eigenvector centrality")
 # plt.ylabel("Počet vrcholů")
 # plt.show()
-
+#
 # # IV
 # # shlukovaci koeficient
 # # prumerny shlukovaci koeficient
@@ -88,13 +90,12 @@ G = mtx_to_graph(mtx)
 # # 4. Vizualizace shlukovacího efektu
 # plt.figure(figsize=(8, 6))
 # plt.scatter(avg_cc_by_degree.keys(), avg_cc_by_degree.values(), color="blue", label="Průměrný CC", s=5)
-# plt.xlabel("Stupeň vrcholu (Degree)")
+# plt.xlabel("Stupeň vrcholu")
 # plt.ylabel("Průměrný shlukovací koeficient (CC)")
-# plt.title("Shlukovací efekt (Clustering Effect)")
+# plt.title("Shlukovací efekt")
 # plt.grid(True)
-# plt.legend()
 # plt.show()
-
+#
 # #V
 # # Souvislost - počet souvislých komponent a distribuce jejich velikostí.
 # # Počet souvislých komponent
@@ -114,88 +115,88 @@ G = mtx_to_graph(mtx)
 # plt.ylabel("Počet komponent")
 # plt.xscale("log")
 # plt.show()
+#
+# # VI
+# # Vizualizace grafu pomoci gephi
+# # export do souboru
+# nx.write_gexf(G, "graph.gexf")
 
-# VI
-# Vizualizace grafu pomoci gephi
-# export do souboru
-#nx.write_gexf(G, "graph.gexf")
+# 2
+#I Komunity
+# Louvain
+print("Louvain")
+louvain_communities = nx.algorithms.community.louvain_communities(G)
+print(f"Pocet komunit = {len(louvain_communities)}")
+# prumerna velikost komunity
+avg_community_size = np.mean([len(community) for community in louvain_communities])
+print(f"Prumerna velikost komunity = {avg_community_size}")
+# minimalni velikost komunity
+min_community_size = np.min([len(community) for community in louvain_communities])
+print(f"Minimalni velikost komunity = {min_community_size}")
+# maximalni velikost komunity
+max_community_size = np.max([len(community) for community in louvain_communities])
+print(f"Maximalni velikost komunity = {max_community_size}")
+# modularity
+modularity = nx.algorithms.community.quality.modularity(G, louvain_communities)
+print(f"Modularity = {modularity}")
+#II
+# distribuce velikosti komunit
+community_sizes = [len(community) for community in louvain_communities]
+community_size_counts = np.unique(community_sizes, return_counts=True)
+plt.scatter(community_size_counts[0], community_size_counts[1], s=10)
+plt.title("Distribuce velikosti komunit Louvain")
+plt.xlabel("Velikost komunity")
+plt.ylabel("Počet komunit")
+plt.xscale("log")
+plt.show()
+#III
+# export komunit do gephi
+community_dict = {}
+for i, community in enumerate(louvain_communities):
+    for node in community:
+        community_dict[node] = i
+nx.set_node_attributes(G, community_dict, "community")
+nx.write_gexf(G, "graph_communities_louvain.gexf")
 
-# # 2
-# #I Komunity
-# # Louvain
-# print("Louvain")
-# louvain_communities = nx.algorithms.community.louvain_communities(G)
-# print(f"Pocet komunit = {len(louvain_communities)}")
-# # prumerna velikost komunity
-# avg_community_size = np.mean([len(community) for community in louvain_communities])
-# print(f"Prumerna velikost komunity = {avg_community_size}")
-# # minimalni velikost komunity
-# min_community_size = np.min([len(community) for community in louvain_communities])
-# print(f"Minimalni velikost komunity = {min_community_size}")
-# # maximalni velikost komunity
-# max_community_size = np.max([len(community) for community in louvain_communities])
-# print(f"Maximalni velikost komunity = {max_community_size}")
-# # modularity
-# modularity = nx.algorithms.community.quality.modularity(G, louvain_communities)
-# print(f"Modularity = {modularity}")
-# #II
-# # distribuce velikosti komunit
-# community_sizes = [len(community) for community in louvain_communities]
-# community_size_counts = np.unique(community_sizes, return_counts=True)
-# plt.scatter(community_size_counts[0], community_size_counts[1], s=10)
-# plt.title("Distribuce velikosti komunit")
-# plt.xlabel("Velikost komunity")
-# plt.ylabel("Počet komunit")
-# plt.xscale("log")
-# plt.show()
-# #III
-# # export komunit do gephi
-# community_dict = {}
-# for i, community in enumerate(louvain_communities):
-#     for node in community:
-#         community_dict[node] = i
-# nx.set_node_attributes(G, community_dict, "community")
-# nx.write_gexf(G, "graph_communities_louvain.gexf")
-
-# #3
-# #I kuminity
-# # Label propagation
-# print("Label propagation")
-# label_propagation_communities_dict = nx.algorithms.community.label_propagation_communities(G)
-# label_propagation_communities = [list(community) for community in label_propagation_communities_dict]
-# print(f"Pocet komunit = {len(label_propagation_communities)}")
-# # prumerna velikost komunity
-# avg_community_size = np.mean([len(community) for community in label_propagation_communities])
-# print(f"Prumerna velikost komunity = {avg_community_size}")
-# # minimalni velikost komunity
-# min_community_size = np.min([len(community) for community in label_propagation_communities])
-# print(f"Minimalni velikost komunity = {min_community_size}")
-# # maximalni velikost komunity
-# max_community_size = np.max([len(community) for community in label_propagation_communities])
-# print(f"Maximalni velikost komunity = {max_community_size}")
-# # modularity
-# modularity = nx.algorithms.community.quality.modularity(G, label_propagation_communities)
-# print(f"Modularity = {modularity}")
-# #II
-# # distribuce velikosti komunit
-# community_sizes = [len(community) for community in label_propagation_communities]
-# community_size_counts = np.unique(community_sizes, return_counts=True)
-# y = np.arange(0, 32, 1)
-# plt.scatter(community_size_counts[0], community_size_counts[1], s=10)
-# plt.title("Distribuce velikosti komunit")
-# plt.xlabel("Velikost komunity")
-# plt.ylabel("Počet komunit")
-# plt.xscale("log")
-# plt.yticks(y)
-# plt.show()
-# #III
-# # export komunit do gephi
-# community_dict = {}
-# for i, community in enumerate(label_propagation_communities):
-#     for node in community:
-#         community_dict[node] = i
-# nx.set_node_attributes(G, community_dict, "community")
-# nx.write_gexf(G, "graph_communities_gn.gexf")
+#3
+#I kuminity
+# Label propagation
+print("Label propagation")
+label_propagation_communities_dict = nx.algorithms.community.label_propagation_communities(G)
+label_propagation_communities = [list(community) for community in label_propagation_communities_dict]
+print(f"Pocet komunit = {len(label_propagation_communities)}")
+# prumerna velikost komunity
+avg_community_size = np.mean([len(community) for community in label_propagation_communities])
+print(f"Prumerna velikost komunity = {avg_community_size}")
+# minimalni velikost komunity
+min_community_size = np.min([len(community) for community in label_propagation_communities])
+print(f"Minimalni velikost komunity = {min_community_size}")
+# maximalni velikost komunity
+max_community_size = np.max([len(community) for community in label_propagation_communities])
+print(f"Maximalni velikost komunity = {max_community_size}")
+# modularity
+modularity = nx.algorithms.community.quality.modularity(G, label_propagation_communities)
+print(f"Modularity = {modularity}")
+#II
+# distribuce velikosti komunit
+community_sizes = [len(community) for community in label_propagation_communities]
+community_size_counts = np.unique(community_sizes, return_counts=True)
+y = np.arange(0, 32, 1)
+plt.scatter(community_size_counts[0], community_size_counts[1], s=10)
+plt.title("Distribuce velikosti komunit Label propagation")
+plt.xlabel("Velikost komunity")
+plt.ylabel("Počet komunit")
+plt.xscale("log")
+plt.yticks(y)
+plt.show()
+#III
+# export komunit do gephi
+community_dict = {}
+for i, community in enumerate(label_propagation_communities):
+    for node in community:
+        community_dict[node] = i
+nx.set_node_attributes(G, community_dict, "community")
+nx.write_gexf(G, "graph_communities_gn.gexf")
 
 # infomap
 print("Infomap")
@@ -205,11 +206,14 @@ for edge in G.edges():
 infomap.run()
 infomap_communities_dict = infomap.getModules()
 #info map vraci data ve formatu {node: community}
-infomap_communities = []
+infomap_communities = {}
 for node, community in infomap_communities_dict.items():
-    while len(infomap_communities) <= community:
-        infomap_communities.append([])
+    if community not in infomap_communities:
+        infomap_communities[community] = []
     infomap_communities[community].append(node)
+
+# Convert the dictionary to a list of communities
+infomap_communities = list(infomap_communities.values())
 
 print(f"Pocet komunit = {len(infomap_communities)}")
 # prumerna velikost komunity
@@ -228,7 +232,7 @@ print(f"Modularity = {modularity}")
 community_sizes = [len(community) for community in infomap_communities]
 community_size_counts = np.unique(community_sizes, return_counts=True)
 plt.scatter(community_size_counts[0], community_size_counts[1], s=10)
-plt.title("Distribuce velikosti komunit")
+plt.title("Distribuce velikosti komunit Infomap")
 plt.xlabel("Velikost komunity")
 plt.ylabel("Počet komunit")
 plt.xscale("log")
